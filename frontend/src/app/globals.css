@@ -77,7 +77,7 @@ body {
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(24, 24, 32, 0.95);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -195,6 +195,19 @@ input::placeholder, textarea::placeholder {
 select option {
   background: #1a1a2e;
   color: var(--foreground);
+}
+
+/* OTP digit input */
+.otp-input {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.otp-input:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15), 0 0 20px rgba(124, 58, 237, 0.1);
+  background: rgba(124, 58, 237, 0.05);
 }
 
 /* Background gradient mesh (for landing page) */

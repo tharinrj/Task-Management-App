@@ -10,6 +10,8 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
+  verifyOtp: (email: string, otp: string) => Promise<void>;
+  resendOtp: (email: string) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
 }
@@ -53,13 +55,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = useCallback(
     async (name: string, email: string, password: string) => {
-      const res = await authApi.register(name, email, password);
+      // Step 1: Send OTP — does NOT create user or return token
+      await authApi.register(name, email, password);
+    },
+    []
+  );
+
+  const verifyOtp = useCallback(
+    async (email: string, otp: string) => {
+      // Step 2: Verify OTP — creates user and returns token
+      const res = await authApi.verifyOtp(email, otp);
       setUser(res.data.user);
       setToken(res.data.token);
       localStorage.setItem('token', res.data.token);
     },
     []
   );
+
+  const resendOtp = useCallback(async (email: string) => {
+    await authApi.resendOtp(email);
+  }, []);
 
   const logout = useCallback(() => {
     setUser(null);
@@ -71,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, login, register, logout, isAdmin }}
+      value={{ user, token, isLoading, login, register, verifyOtp, resendOtp, logout, isAdmin }}
     >
       {children}
     </AuthContext.Provider>

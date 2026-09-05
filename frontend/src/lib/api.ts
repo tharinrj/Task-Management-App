@@ -55,9 +55,21 @@ async function apiFetch<T>(
  */
 export const authApi = {
   register: (name: string, email: string, password: string) =>
-    apiFetch<AuthResponse>('/auth/register', {
+    apiFetch<{ success: boolean; message: string }>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ name, email, password }),
+    }),
+
+  verifyOtp: (email: string, otp: string) =>
+    apiFetch<AuthResponse>('/auth/verify-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email, otp }),
+    }),
+
+  resendOtp: (email: string) =>
+    apiFetch<{ success: boolean; message: string }>('/auth/resend-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
     }),
 
   login: (email: string, password: string) =>
