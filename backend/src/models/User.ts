@@ -31,7 +31,21 @@ const userSchema = new Schema<IUser>(
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters'],
+      minlength: [8, 'Password must be at least 8 characters'],
+      validate: {
+        validator: function (value: string) {
+          // Skip validation if password is already hashed (bcrypt hashes start with $2)
+          if (value.startsWith('$2')) return true;
+          return (
+            /[A-Z]/.test(value) &&
+            /[a-z]/.test(value) &&
+            /[0-9]/.test(value) &&
+            /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value)
+          );
+        },
+        message:
+          'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+      },
       select: false, // Don't include password in queries by default
     },
     role: {

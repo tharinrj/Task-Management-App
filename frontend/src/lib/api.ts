@@ -44,6 +44,11 @@ async function apiFetch<T>(
   const data = await response.json();
 
   if (!response.ok) {
+    // If the response contains validation errors, extract the specific messages
+    if (data.errors && Array.isArray(data.errors)) {
+      const messages = data.errors.map((err: { msg: string }) => err.msg);
+      throw new Error(messages.join('\n'));
+    }
     throw new Error(data.message || 'Something went wrong');
   }
 

@@ -14,6 +14,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Step 2 state
   const [step, setStep] = useState<1 | 2>(1);
@@ -75,8 +76,15 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+    const passwordErrors: string[] = [];
+    if (password.length < 8) passwordErrors.push('Password must be at least 8 characters');
+    if (!/[A-Z]/.test(password)) passwordErrors.push('Password must contain at least one uppercase letter');
+    if (!/[a-z]/.test(password)) passwordErrors.push('Password must contain at least one lowercase letter');
+    if (!/[0-9]/.test(password)) passwordErrors.push('Password must contain at least one number');
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) passwordErrors.push('Password must contain at least one special character');
+
+    if (passwordErrors.length > 0) {
+      setError(passwordErrors.join('\n'));
       return;
     }
 
@@ -211,11 +219,11 @@ export default function RegisterPage() {
             {step === 1
               ? 'Sign up to start managing your tasks'
               : (
-                  <>
-                    We sent a 6-digit code to{' '}
-                    <span className="text-purple-400 font-medium">{email}</span>
-                  </>
-                )}
+                <>
+                  We sent a 6-digit code to{' '}
+                  <span className="text-purple-400 font-medium">{email}</span>
+                </>
+              )}
           </p>
         </div>
 
@@ -224,7 +232,15 @@ export default function RegisterPage() {
           {/* Error */}
           {error && (
             <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-              {error}
+              {error.includes('\n') ? (
+                <ul className="list-disc list-inside space-y-1">
+                  {error.split('\n').map((msg, i) => (
+                    <li key={i}>{msg}</li>
+                  ))}
+                </ul>
+              ) : (
+                error
+              )}
             </div>
           )}
 
@@ -271,28 +287,82 @@ export default function RegisterPage() {
                 <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">
                   Password
                 </label>
-                <input
-                  id="register-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min 6 characters"
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <input
+                    id="register-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Min 8 characters"
+                    autoComplete="new-password"
+                    style={{ paddingRight: '2.75rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    )}
+                  </button>
+                </div>
+                {/* Password requirements checklist */}
+                {password.length > 0 && (
+                  <ul className="mt-2 space-y-1 text-xs">
+                    {[
+                      { test: password.length >= 8, label: 'At least 8 characters' },
+                      { test: /[A-Z]/.test(password), label: 'One uppercase letter' },
+                      { test: /[a-z]/.test(password), label: 'One lowercase letter' },
+                      { test: /[0-9]/.test(password), label: 'One number' },
+                      { test: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password), label: 'One special character' },
+                    ].map(({ test, label }) => (
+                      <li
+                        key={label}
+                        className={`flex items-center gap-1.5 transition-colors ${
+                          test ? 'text-emerald-400' : 'text-zinc-500'
+                        }`}
+                      >
+                        <span>{test ? '✓' : '✗'}</span>
+                        <span>{label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               <div>
                 <label className="block text-xs text-zinc-400 mb-1.5 uppercase tracking-wider">
                   Confirm Password
                 </label>
-                <input
-                  id="register-confirm-password"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Re-enter password"
-                  autoComplete="new-password"
-                />
+                <div className="relative">
+                  <input
+                    id="register-confirm-password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Re-enter password"
+                    autoComplete="new-password"
+                    style={{ paddingRight: '2.75rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <button
