@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Task, User, TaskStatus, CreateTaskData, UpdateTaskData } from '@/lib/types';
 
 interface TaskModalProps {
@@ -22,27 +22,12 @@ export default function TaskModal({
   isAdmin,
   onAssign,
 }: TaskModalProps) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [status, setStatus] = useState<TaskStatus>('todo');
-  const [assignedTo, setAssignedTo] = useState<string>('');
+  const [title, setTitle] = useState(task?.title ?? '');
+  const [description, setDescription] = useState(task?.description ?? '');
+  const [status, setStatus] = useState<TaskStatus>(task?.status ?? 'todo');
+  const [assignedTo, setAssignedTo] = useState<string>(task?.assignedTo?._id ?? '');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (task) {
-      setTitle(task.title);
-      setDescription(task.description || '');
-      setStatus(task.status);
-      setAssignedTo(task.assignedTo?._id || '');
-    } else {
-      setTitle('');
-      setDescription('');
-      setStatus('todo');
-      setAssignedTo('');
-    }
-    setError('');
-  }, [task, isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,8 +64,8 @@ export default function TaskModal({
         });
       }
       onClose();
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setIsSubmitting(false);
     }
@@ -201,8 +186,8 @@ export default function TaskModal({
               {isSubmitting
                 ? 'Saving...'
                 : task
-                ? 'Update Task'
-                : 'Create Task'}
+                  ? 'Update Task'
+                  : 'Create Task'}
             </button>
           </div>
         </form>

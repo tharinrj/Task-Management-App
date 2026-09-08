@@ -43,8 +43,8 @@ export default function DashboardPage() {
     try {
       const res = await tasksApi.getAll();
       setTasks(res.data.tasks);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load tasks');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to load tasks');
     } finally {
       setIsLoadingTasks(false);
     }
@@ -62,8 +62,10 @@ export default function DashboardPage() {
   }, [isAdmin]);
 
   useEffect(() => {
-    fetchTasks();
-    fetchUsers();
+    const loadData = async () => {
+      await Promise.all([fetchTasks(), fetchUsers()]);
+    };
+    loadData();
   }, [fetchTasks, fetchUsers]);
 
   // Group tasks by status
@@ -94,7 +96,7 @@ export default function DashboardPage() {
 
     try {
       await tasksApi.updateStatus(taskId, newStatus);
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Revert on failure
       setTasks((prev) =>
         prev.map((t) =>
@@ -103,7 +105,7 @@ export default function DashboardPage() {
             : t
         )
       );
-      setError(err.message || 'Failed to update task status');
+      setError(err instanceof Error ? err.message : 'Failed to update task status');
     }
   };
 
@@ -136,8 +138,8 @@ export default function DashboardPage() {
       setTasks((prev) => prev.filter((t) => t._id !== deletingTaskId));
       setIsDeleteModalOpen(false);
       setDeletingTaskId(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete task');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to delete task');
     } finally {
       setIsDeleting(false);
     }
@@ -164,8 +166,8 @@ export default function DashboardPage() {
         setTasks((prev) =>
           prev.map((t) => (t._id === taskId ? res.data.task : t))
         );
-      } catch (err: any) {
-        setError(err.message || 'Failed to assign task');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to assign task');
       }
     }
   };
@@ -264,6 +266,7 @@ export default function DashboardPage() {
 
         {/* Task Create/Edit Modal */}
         <TaskModal
+          key={`${editingTask?._id ?? 'new'}-${isTaskModalOpen}`}
           isOpen={isTaskModalOpen}
           onClose={() => {
             setIsTaskModalOpen(false);

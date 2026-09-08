@@ -20,31 +20,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    return localStorage.getItem('token');
+  });
+  const [isLoading, setIsLoading] = useState(() => token !== null);
 
-  // Restore session from localStorage on mount
+  // Validate stored token on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      authApi
-        .getMe()
-        .then((res) => {
-          setUser(res.data.user);
-        })
-        .catch(() => {
-          // Token is invalid, clear it
-          localStorage.removeItem('token');
-          setToken(null);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
+    if (!token) return;
+
+    authApi
+      .getMe()
+      .then((res) => {
+        setUser(res.data.user);
+      })
+      .catch(() => {
+        // Token is invalid, clear it
+        localStorage.removeItem('token');
+        setToken(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await authApi.login(email, password);

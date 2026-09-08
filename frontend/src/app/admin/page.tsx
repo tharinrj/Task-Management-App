@@ -20,8 +20,8 @@ export default function AdminPage() {
       try {
         const res = await usersApi.getAll();
         setUsers(res.data.users);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load users');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Failed to load users');
       } finally {
         setIsLoading(false);
       }
