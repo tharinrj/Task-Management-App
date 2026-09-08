@@ -1,0 +1,71 @@
+# ──────────────────────────────────────────────────
+# TaskBoard — Docker Compose
+# ──────────────────────────────────────────────────
+# Usage:
+#   Production (pulling from GHCR):
+#     docker compose up -d
+#
+#   Local development (build from source):
+#     docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# ──────────────────────────────────────────────────
+
+services:
+  # ───── Backend (Express API) ─────────────────
+  backend:
+    image: ghcr.io/tharinrj/taskboard-backend:latest
+    container_name: taskboard-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      - NODE_ENV=production
+      - FRONTEND_URL=http://frontend:3000
+    networks:
+      - taskboard-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+
+  # ───── Frontend (Next.js) ────────────────────
+  frontend:
+    image: ghcr.io/tharinrj/taskboard-frontend:latest
+    container_name: taskboard-frontend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - taskboard-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+
+  # ───── Nginx (Reverse Proxy) ─────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: taskboard-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    networks:
+      - taskboard-network
+
+networks:
+  taskboard-network:
+    driver: bridge
