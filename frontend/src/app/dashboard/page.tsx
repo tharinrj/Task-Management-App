@@ -139,6 +139,8 @@ export default function DashboardPage() {
       setIsDeleteModalOpen(false);
       setDeletingTaskId(null);
     } catch (err: unknown) {
+      setIsDeleteModalOpen(false);
+      setDeletingTaskId(null);
       setError(err instanceof Error ? err.message : 'Failed to delete task');
     } finally {
       setIsDeleting(false);
