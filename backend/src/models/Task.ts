@@ -5,6 +5,7 @@ export interface ITask extends Document {
   title: string;
   description: string;
   status: 'todo' | 'doing' | 'done';
+  order: number;
   creator: mongoose.Types.ObjectId;
   assignedTo: mongoose.Types.ObjectId | null;
   createdAt: Date;
@@ -40,6 +41,10 @@ const taskSchema = new Schema<ITask>(
       ref: 'User',
       default: null,
     },
+    order: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,
@@ -49,6 +54,7 @@ const taskSchema = new Schema<ITask>(
 // Index for efficient queries
 taskSchema.index({ creator: 1, status: 1 });
 taskSchema.index({ assignedTo: 1, status: 1 });
+taskSchema.index({ status: 1, order: 1 });
 
 const Task: Model<ITask> = mongoose.model<ITask>('Task', taskSchema);
 

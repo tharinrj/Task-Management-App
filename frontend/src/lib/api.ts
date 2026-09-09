@@ -125,6 +125,12 @@ export const tasksApi = {
       method: 'PATCH',
       body: JSON.stringify({ assignedTo }),
     }),
+
+  reorder: (tasks: Array<{ id: string; order: number; status: string }>) =>
+    apiFetch<{ success: boolean; message: string }>('/tasks/reorder', {
+      method: 'PATCH',
+      body: JSON.stringify({ tasks }),
+    }),
 };
 
 /**

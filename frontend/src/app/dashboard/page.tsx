@@ -68,10 +68,12 @@ export default function DashboardPage() {
     loadData();
   }, [fetchTasks, fetchUsers]);
 
-  // Group tasks by status
+  // Group tasks by status, sorted by order
   const tasksByStatus = columns.reduce(
     (acc, col) => {
-      acc[col.id] = tasks.filter((t) => t.status === col.id);
+      acc[col.id] = tasks
+        .filter((t) => t.status === col.id)
+        .sort((a, b) => a.order - b.order);
       return acc;
     },
     {} as Record<TaskStatus, Task[]>
@@ -79,33 +81,63 @@ export default function DashboardPage() {
 
   // Drag end handler
   const handleDragEnd = async (result: DropResult) => {
-    const { destination, source, draggableId } = result;
+    const { destination, source } = result;
 
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) {
       return;
     }
 
-    const newStatus = destination.droppableId as TaskStatus;
-    const taskId = draggableId;
+    const sourceStatus = source.droppableId as TaskStatus;
+    const destStatus = destination.droppableId as TaskStatus;
 
-    // Optimistic update
-    setTasks((prev) =>
-      prev.map((t) => (t._id === taskId ? { ...t, status: newStatus } : t))
-    );
+    let reorderPayload: Array<{ id: string; order: number; status: string }> = [];
+    let snapshotBeforeDrag: Task[] = [];
+
+    setTasks((prev) => {
+      snapshotBeforeDrag = prev;
+
+      // Build sorted column arrays from current state
+      const sourceCol = prev
+        .filter((t) => t.status === sourceStatus)
+        .sort((a, b) => a.order - b.order);
+      const destCol = sourceStatus === destStatus
+        ? sourceCol
+        : prev.filter((t) => t.status === destStatus).sort((a, b) => a.order - b.order);
+
+      // Remove task from source column
+      const [movedTask] = sourceCol.splice(source.index, 1);
+
+      // Insert into destination column
+      const targetCol = sourceStatus === destStatus ? sourceCol : destCol;
+      targetCol.splice(destination.index, 0, { ...movedTask, status: destStatus });
+
+      // Build reorder payload for affected columns
+      reorderPayload = [];
+      const assignOrders = (col: Task[], status: TaskStatus) => {
+        col.forEach((t, i) => {
+          reorderPayload.push({ id: t._id, order: i, status });
+        });
+      };
+
+      assignOrders(sourceStatus === destStatus ? targetCol : sourceCol, sourceStatus);
+      if (sourceStatus !== destStatus) {
+        assignOrders(targetCol, destStatus);
+      }
+
+      // Apply updates to the full tasks array
+      const orderMap = new Map(reorderPayload.map((r) => [r.id, r]));
+      return prev.map((t) => {
+        const update = orderMap.get(t._id);
+        return update ? { ...t, status: update.status as TaskStatus, order: update.order } : t;
+      });
+    });
 
     try {
-      await tasksApi.updateStatus(taskId, newStatus);
+      await tasksApi.reorder(reorderPayload);
     } catch (err: unknown) {
-      // Revert on failure
-      setTasks((prev) =>
-        prev.map((t) =>
-          t._id === taskId
-            ? { ...t, status: source.droppableId as TaskStatus }
-            : t
-        )
-      );
-      setError(err instanceof Error ? err.message : 'Failed to update task status');
+      setTasks(snapshotBeforeDrag);
+      setError(err instanceof Error ? err.message : 'Failed to reorder tasks');
     }
   };
 

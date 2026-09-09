@@ -13,6 +13,7 @@ export interface Task {
   title: string;
   description: string;
   status: 'todo' | 'doing' | 'done';
+  order: number;
   creator: {
     _id: string;
     name: string;

@@ -57,18 +57,19 @@ export default function TaskCard({
           className={`group p-4 rounded-xl cursor-grab active:cursor-grabbing ${
             snapshot.isDragging
               ? 'glass-strong shadow-2xl shadow-purple-500/10'
-              : 'glass hover:bg-white/[0.06] transition-all duration-200'
+              : 'glass hover:bg-white/[0.06]'
           }`}
           style={{
             ...provided.draggableProps.style,
             ...(snapshot.isDragging
               ? {
-                  transform: `${provided.draggableProps.style?.transform ?? ''} scale(1.02) rotate(1deg)`,
                   backdropFilter: 'none',
                   WebkitBackdropFilter: 'none',
-                  willChange: 'transform',
                 }
               : {}),
+            transition: snapshot.isDragging
+              ? provided.draggableProps.style?.transition
+              : 'background-color 0.2s ease, box-shadow 0.2s ease',
           }}
         >
           {/* Status indicator line */}

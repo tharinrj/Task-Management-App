@@ -8,6 +8,7 @@ import {
   deleteTask,
   updateTaskStatus,
   assignTask,
+  reorderTasks,
 } from '../controllers/taskController';
 import { authenticate } from '../middleware/auth';
 
@@ -41,6 +42,9 @@ router.post(
   ],
   createTask
 );
+
+// PATCH /api/tasks/reorder — batch reorder tasks (must be before :id routes)
+router.patch('/reorder', reorderTasks);
 
 // GET /api/tasks/:id
 router.get('/:id', getTask);

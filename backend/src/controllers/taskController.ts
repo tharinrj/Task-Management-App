@@ -29,7 +29,7 @@ export const getTasks = async (
     const tasks = await Task.find(query)
       .populate('creator', 'name email')
       .populate('assignedTo', 'name email')
-      .sort({ updatedAt: -1 });
+      .sort({ order: 1 });
 
     res.json({
       success: true,
@@ -64,10 +64,16 @@ export const createTask = async (
     const user = req.user!;
     const { title, description, status } = req.body;
 
+    // Set order to place new task at the top of its column
+    const targetStatus = status || 'todo';
+    const topTask = await Task.findOne({ status: targetStatus }).sort({ order: 1 }).limit(1);
+    const newOrder = topTask ? topTask.order - 1 : 0;
+
     const task = await Task.create({
       title,
       description: description || '',
-      status: status || 'todo',
+      status: targetStatus,
+      order: newOrder,
       creator: user._id,
       assignedTo: null,
     });
@@ -368,6 +374,44 @@ export const assignTask = async (
       success: true,
       message: 'Task assignment updated successfully',
       data: { task },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PATCH /api/tasks/reorder
+ * Batch-update task order (and optionally status) after drag-and-drop
+ */
+export const reorderTasks = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { tasks } = req.body;
+
+    if (!Array.isArray(tasks)) {
+      res.status(400).json({
+        success: false,
+        message: 'tasks must be an array of { id, order, status }.',
+      });
+      return;
+    }
+
+    const bulkOps = tasks.map((t: { id: string; order: number; status: string }) => ({
+      updateOne: {
+        filter: { _id: t.id },
+        update: { $set: { order: t.order, status: t.status } },
+      },
+    }));
+
+    await Task.bulkWrite(bulkOps);
+
+    res.json({
+      success: true,
+      message: 'Tasks reordered successfully',
     });
   } catch (error) {
     next(error);
