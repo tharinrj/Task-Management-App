@@ -34,14 +34,13 @@ export default function Home() {
             className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1]"
             style={{ fontFamily: 'var(--font-outfit)' }}
           >
-            Organize your work,{' '}
-            <span className="gradient-text">beautifully</span>
+            Your tasks,{' '}
+            <span className="gradient-text">simplified</span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            A powerful Kanban board with drag-and-drop task management,
-            role-based access control, and a stunning dark interface.
+            Streamline your workflow with our intuitive Kanban board. Effortlessly manage tasks, collaborate with your team, and achieve your goals with clarity and focus.
           </p>
 
           {/* CTAs */}
