@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
-import Task from '../models/Task';
+import mongoose from 'mongoose';
+import Task, { ITask } from '../models/Task';
 
 /**
  * GET /api/tasks
@@ -400,9 +401,9 @@ export const reorderTasks = async (
       return;
     }
 
-    const bulkOps = tasks.map((t: { id: string; order: number; status: string }) => ({
+    const bulkOps = tasks.map((t: { id: string; order: number; status: ITask['status'] }) => ({
       updateOne: {
-        filter: { _id: t.id },
+        filter: { _id: new mongoose.Types.ObjectId(t.id) },
         update: { $set: { order: t.order, status: t.status } },
       },
     }));

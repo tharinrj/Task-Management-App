@@ -9,7 +9,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "seed": "ts-node src/scripts/seedAdmin.ts",
     "seed:prod": "node dist/scripts/seedAdmin.js",
-    "lint": "eslint"
+    "lint": "eslint && tsc --noEmit"
   },
   "keywords": [
     "taskboard",
