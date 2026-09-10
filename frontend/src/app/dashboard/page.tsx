@@ -14,7 +14,7 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 
 const columns: { id: TaskStatus; title: string }[] = [
   { id: 'todo', title: 'To Do' },
-  { id: 'doing', title: 'In Progress' },
+  { id: 'doing', title: 'Doing' },
   { id: 'done', title: 'Done' },
 ];
 

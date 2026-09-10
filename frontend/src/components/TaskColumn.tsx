@@ -41,6 +41,7 @@ export default function TaskColumn({
   onDelete,
   onAssign,
   isAdmin,
+  currentUserId,
 }: TaskColumnProps) {
   const config = columnConfig[columnId];
 
@@ -106,6 +107,7 @@ export default function TaskColumn({
                 onAssign={onAssign}
                 canAssign={!task.assignedTo}
                 isAdmin={isAdmin}
+                currentUserId={currentUserId}
               />
             ))}
             {provided.placeholder}

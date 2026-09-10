@@ -12,6 +12,7 @@ interface TaskCardProps {
   onAssign: (taskId: string) => void;
   canAssign: boolean;
   isAdmin: boolean;
+  currentUserId: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -28,7 +29,12 @@ export default function TaskCard({
   onAssign,
   canAssign,
   isAdmin,
+  currentUserId,
 }: TaskCardProps) {
+  const isCreator = task.creator._id === currentUserId;
+  const isAssignee = task.assignedTo?._id === currentUserId;
+  const canEdit = isAdmin || isCreator || isAssignee;
+  const canDelete = isAdmin || isCreator;
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -112,7 +118,9 @@ export default function TaskCard({
           </div>
 
           {/* Actions - visible on hover */}
+          {(canEdit || canDelete || canAssign || isAdmin) && (
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            {canEdit && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -123,6 +131,7 @@ export default function TaskCard({
             >
               Edit
             </button>
+            )}
             {(canAssign || isAdmin) && (
               <button
                 onClick={(e) => {
@@ -141,6 +150,7 @@ export default function TaskCard({
                   : null}
               </button>
             )}
+            {canDelete && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -151,7 +161,9 @@ export default function TaskCard({
             >
               Delete
             </button>
+            )}
           </div>
+          )}
         </div>
       )}
     </Draggable>
