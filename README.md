@@ -12,12 +12,11 @@ A full-stack Kanban-style task management application with drag-and-drop functio
 
 <img width="1920" height="1140" alt="Screenshot 2026-09-10 164705" src="https://github.com/user-attachments/assets/de747d87-1693-4d87-a2ab-7f5bb8c5359d" />
 
-<img width="1920" height="1140" alt="Screenshot 2026-09-10 164711" src="https://github.com/user-attachments/assets/138b760a-5525-4d81-9cd7-b2cbc9f25eaa" />
-
 <img width="1920" height="1140" alt="Screenshot 2026-09-10 170426" src="https://github.com/user-attachments/assets/7ad45b49-9851-4ec4-82f6-ff0c2e327f6e" />
 
 <img width="1920" height="1140" alt="Screenshot 2026-09-10 170444" src="https://github.com/user-attachments/assets/fe6769cd-4e01-48a1-8645-aea4c82b9e4a" />
 
+<img width="1920" height="1140" alt="Screenshot 2026-09-11 215105" src="https://github.com/user-attachments/assets/ed1f3068-a4b7-48a4-99ab-0c3922dac13f" />
 
 ---
 
